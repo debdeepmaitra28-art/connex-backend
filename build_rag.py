@@ -15,7 +15,7 @@ model = SentenceTransformer("all-MiniLM-L6-v2")
 client = chromadb.PersistentClient(path=DB_FOLDER)
 
 # Create a collection for our Connex documents
-collection = client.get_or_create_collection(name="connex_documents")
+collection = client.get_or_create_collection(name="pdf_documents")
 
 
 def split_text(text, chunk_size=1000, overlap=200):
