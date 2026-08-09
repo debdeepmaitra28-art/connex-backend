@@ -1,1 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Access 360 | For US Healthcare Providers</title>
+<style>
+  :root{
+    --maroon-dark:#4a0f28;
+    --maroon:#7a1b3d;
+    --red-orange:#b8342a;
+    --orange:#f5a623;
+    --orange-dark:#e0901a;
+    --teal:#0d9488;
+    --ink:#1f2430;
+    --muted:#6b7280;
+    --line:#e5e0da;
+    --bg:#f6f5f2;
+    --card:#ffffff;
+    --radius:10px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);}
+  a{color:inherit;text-decoration:none;}
 
+  /* ---------- Top bar ---------- */
+  .topbar{
+    background:linear-gradient(120deg,var(--maroon-dark) 0%,var(--maroon) 45%,var(--red-orange) 100%);
+    color:#fff;
+    padding:14px 28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .brand{display:flex;align-items:baseline;gap:6px;}
+  .brand .eyebrow{font-size:10px;letter-spacing:.14em;color:#f3d9d9;text-transform:uppercase;display:block;margin-bottom:2px;}
+  .brand-name{font-size:26px;font-weight:800;color:#fff;letter-spacing:.5px;}
+  .brand-name span{color:var(--orange);font-style:italic;}
+  .topnav{display:flex;align-items:center;gap:22px;font-size:14px;}
+  .topnav .active{font-weight:700;border-bottom:2px solid #fff;padding-bottom:3px;}
+  .search{
+    display:flex;align-items:center;gap:6px;
+    background:#fff;border-radius:20px;padding:6px 14px;
+    min-width:200px;
+  }
+  .search input{border:none;outline:none;font-size:13px;flex:1;color:var(--ink);}
+  .search svg{width:14px;height:14px;flex-shrink:0;color:var(--red-orange);}
+
+  /* ---------- Sub nav ---------- */
+  .subnav{
+    background:#fff;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:6px;
+    padding:12px 28px;flex-wrap:wrap;
+  }
+  .pill{
+    padding:9px 16px;border-radius:6px;font-size:13.5px;font-weight:600;cursor:pointer;
+    border:1px solid transparent;white-space:nowrap;
+  }
+  .pill.select-med{background:var(--orange);color:#4a2c00;display:flex;align-items:center;gap:6px;}
+  .pill.tab{color:var(--ink);}
+  .pill.tab.active{background:var(--orange);color:#4a2c00;}
+  .pill.tab:not(.active):hover{background:var(--bg);}
+
+  /* ---------- Medication grid ---------- */
+  main{max-width:1180px;margin:0 auto;padding:28px 28px 100px;}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;}
+  .col h4{
+    margin:0 0 12px;font-size:14px;letter-spacing:.04em;color:var(--muted);
+    border-bottom:2px solid var(--orange);padding-bottom:8px;
+  }
+  .med-card{
+    background:var(--card);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;margin-bottom:12px;display:flex;flex-direction:column;gap:2px;
+    transition:box-shadow .15s, transform .15s;cursor:pointer;
+  }
+  .med-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.08);transform:translateY(-1px);}
+  .med-name{font-weight:800;font-size:14.5px;color:var(--ink);}
+  .med-generic{font-size:11.5px;color:var(--muted);}
+  .med-note{font-size:10px;color:var(--teal);margin-top:3px;font-weight:600;}
+
+  footer{
+    text-align:center;font-size:11px;color:var(--muted);padding:18px;border-top:1px solid var(--line);
+  }
+
+  /* ---------- Ask Connex FAB ---------- */
+  .fab{
+    position:fixed;right:26px;bottom:26px;z-index:40;
+    background:var(--maroon);color:#fff;border:none;border-radius:30px;
+    padding:13px 20px;font-size:14px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;gap:8px;
+    box-shadow:0 8px 24px rgba(74,15,40,.4);
+    transition:transform .15s;
+  }
+  .fab:hover{transform:translateY(-2px);}
+  .fab svg{width:17px;height:17px;}
+
+  /* ---------- Chat panel ---------- */
+  .connex-panel{
+    position:fixed;right:26px;bottom:96px;z-index:50;
+    width:380px;max-width:92vw;height:560px;max-height:80vh;
+    background:#fff;border-radius:14px;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.28);
+    display:flex;flex-direction:column;
+    border:1px solid var(--line);
+    transform-origin:bottom right;
+    transition:opacity .18s, transform .18s;
+  }
+  .connex-panel.hidden{opacity:0;transform:scale(.92);pointer-events:none;}
+
+  .connex-header{
+    background:linear-gradient(120deg,var(--maroon-dark),var(--maroon));
+    color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;
+  }
+  .connex-avatar{
+    width:32px;height:32px;border-radius:50%;background:var(--orange);
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--maroon-dark);
+    flex-shrink:0;
+  }
+  .connex-header .title{font-weight:700;font-size:14.5px;line-height:1.2;}
+  .connex-header .subtitle{font-size:11px;color:#e8d3d3;}
+  .connex-header-actions{margin-left:auto;display:flex;gap:6px;}
+  .icon-btn{
+    background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;
+    width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .icon-btn:hover{background:rgba(255,255,255,.28);}
+  .icon-btn svg{width:15px;height:15px;}
+
+  .connex-status{
+    font-size:11px;padding:6px 16px;background:#fdf3f0;color:var(--red-orange);
+    border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;
+  }
+  .connex-status.connected{background:#eefaf6;color:#0d7a63;}
+  .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+  .connex-body{
+    flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;
+    background:#faf9f7;
+  }
+  .msg{max-width:88%;font-size:13.5px;line-height:1.45;padding:10px 12px;border-radius:12px;white-space:pre-wrap;}
+  .msg.bot{background:#fff;border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:2px;}
+  .msg.user{background:var(--maroon);color:#fff;align-self:flex-end;border-bottom-right-radius:2px;}
+  .msg.typing{color:var(--muted);font-style:italic;}
+
+  .quick-replies{display:flex;flex-wrap:wrap;gap:6px;align-self:flex-start;max-width:100%;}
+  .qr-btn{
+    background:#fff;border:1px solid var(--maroon);color:var(--maroon);
+    padding:7px 12px;border-radius:16px;font-size:12.5px;font-weight:600;cursor:pointer;
+  }
+  .qr-btn:hover{background:var(--maroon);color:#fff;}
+  .dl-btn{
+    background:var(--maroon-dark);color:#fff;border:none;border-radius:6px;
+    padding:8px 10px;font-size:12px;font-weight:600;cursor:pointer;text-align:left;
+    display:flex;align-items:center;gap:6px;
+  }
+
+  .connex-inputbar{
+    display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:#fff;
+  }
+  .connex-inputbar input{
+    flex:1;border:1px solid var(--line);border-radius:20px;padding:10px 14px;font-size:13px;outline:none;
+  }
+  .connex-inputbar input:focus{border-color:var(--maroon);}
+  .send-btn{
+    background:var(--maroon);color:#fff;border:none;border-radius:50%;
+    width:38px;height:38px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .send-btn:hover{background:var(--maroon-dark);}
+  .footnote{font-size:9.5px;color:var(--muted);text-align:center;padding:4px 0 8px;}
+
+  /* ---------- Settings modal ---------- */
+  .settings-overlay{
+    position:fixed;inset:0;background:rgba(20,10,15,.5);z-index:60;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .settings-overlay.hidden{display:none;}
+  .settings-modal{
+    background:#fff;border-radius:12px;width:420px;max-width:92vw;max-height:88vh;overflow-y:auto;
+    padding:22px;box-shadow:0 24px 60px rgba(0,0,0,.35);
+  }
+  .settings-modal h3{margin:0 0 4px;font-size:17px;}
+  .settings-modal p.hint{margin:0 0 16px;font-size:12.5px;color:var(--muted);line-height:1.5;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12px;font-weight:700;color:var(--ink);margin-bottom:5px;}
+  .field select,.field input{
+    width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:7px;font-size:13px;outline:none;
+  }
+  .field select:focus,.field input:focus{border-color:var(--maroon);}
+  .field small{color:var(--muted);font-size:11px;}
+  .settings-actions{display:flex;gap:10px;margin-top:18px;}
+  .btn-primary{
+    background:var(--maroon);color:#fff;border:none;border-radius:7px;padding:10px 16px;
+    font-size:13px;font-weight:700;cursor:pointer;flex:1;
+  }
+  .btn-primary:hover{background:var(--maroon-dark);}
+  .btn-secondary{
+    background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:10px 16px;
+    font-size:13px;font-weight:600;cursor:pointer;
+  }
+  .btn-secondary:hover{background:var(--bg);}
+
+  @media (max-width:900px){
+    .grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:520px){
+    .grid{grid-template-columns:1fr;}
+    .connex-panel{right:10px;left:10px;width:auto;bottom:88px;}
+    .fab{right:14px;bottom:14px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Top bar ===== -->
+<div class="topbar">
+  <div class="brand">
+    <div>
+      <span class="eyebrow">Powered by AstraZeneca</span>
+      <span class="brand-name">Access <span>360</span></span>
+    </div>
+  </div>
+  <div class="topnav">
+    <span class="active">For US Healthcare Providers</span>
+    <span>For Patients</span>
+  </div>
+  <div class="search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" placeholder="Search">
+  </div>
+</div>
+
+<!-- ===== Sub nav ===== -->
+<div class="subnav">
+  <div class="pill select-med">Select Medication ▾</div>
+  <div class="pill tab active">Forms and Resources</div>
+  <div class="pill tab">Patient Affordability</div>
+  <div class="pill tab">Access 360 Portal</div>
+  <div class="pill tab">FAQs</div>
+</div>
+
+<!-- ===== Medication grid ===== -->
+<main>
+  <div class="grid" id="medGrid">
+    <div class="col">
+      <h4>A-F</h4>
+      <div class="med-card"><span class="med-name">BAXFENDY</span><span class="med-generic">baxdrostat</span></div>
+      <div class="med-card"><span class="med-name">Fasenra</span><span class="med-generic">benralizumab</span></div>
+      <div class="med-card"><span class="med-name">CALQUENCE</span><span class="med-generic">acalabrutinib 100 mg tablets</span></div>
+      <div class="med-card"><span class="med-name">FASLODEX</span><span class="med-generic">fulvestrant injection</span></div>
+      <div class="med-card"><span class="med-name">DATROWAY</span><span class="med-generic">datopotamab deruxtecan-dlnk</span><span class="med-note">Click for Prescribing Information</span></div>
+      <div class="med-card"><span class="med-name">FluMist</span><span class="med-generic">Influenza Vaccine Live, Intranasal</span></div>
+    </div>
+    <div class="col">
+      <h4>G-K</h4>
+      <div class="med-card"><span class="med-name">IMFINZI</span><span class="med-generic">durvalumab</span></div>
+      <div class="med-card"><span class="med-name">IMJUDO</span><span class="med-generic">tremelimumab-actl</span></div>
+      <div class="med-card"><span class="med-name">IRESSA</span><span class="med-generic">gefitinib</span></div>
+    </div>
+    <div class="col">
+      <h4>L-P</h4>
+      <div class="med-card"><span class="med-name">LOKELMA</span><span class="med-generic">sodium zirconium cyclosilicate for oral suspension</span></div>
+      <div class="med-card"><span class="med-name">Lynparza</span><span class="med-generic">olaparib</span></div>
+    </div>
+    <div class="col">
+      <h4>R-Z</h4>
+      <div class="med-card"><span class="med-name">Saphnelo</span><span class="med-generic">anifrolumab-fnia</span></div>
+      <div class="med-card"><span class="med-name">TAGRISSO</span><span class="med-generic">osimertinib</span></div>
+      <div class="med-card"><span class="med-name">Truqap</span><span class="med-generic">capivasertib</span></div>
+    </div>
+  </div>
+</main>
+
+<footer>Access 360 — For US Healthcare Providers. This is a demonstration interface.</footer>
+
+<!-- ===== Ask Connex FAB ===== -->
+<button class="fab" id="fabBtn">
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 5.94 2 10.8c0 2.6 1.3 4.93 3.37 6.53-.15 1.2-.63 2.4-1.37 3.4 1.6-.2 3.1-.85 4.35-1.85 1.13.33 2.35.52 3.65.52 5.52 0 10-3.94 10-8.8S17.52 2 12 2z"/></svg>
+  Ask Connex
+</button>
+
+<!-- ===== Chat panel ===== -->
+<div class="connex-panel hidden" id="connexPanel">
+  <div class="connex-header">
+    <div class="connex-avatar">C</div>
+    <div>
+      <div class="title">Connex</div>
+      <div class="subtitle">Your AI Assistant</div>
+    </div>
+    <div class="connex-header-actions">
+      <button class="icon-btn" id="settingsBtn" title="Connect your AI API">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6c.14 0 .28-.02.42-.07A1.65 1.65 0 0010.5 3v-.09a2 2 0 114 0V3c0 .7.4 1.33 1.08 1.6.14.05.28.07.42.07a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c0 .14.02.28.07.42.28.68.9 1.08 1.6 1.08H21a2 2 0 110 4h-.09c-.7 0-1.33.4-1.51 1z"/></svg>
+      </button>
+      <button class="icon-btn" id="closeBtn" title="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="connex-status" id="connexStatus">
+    <span class="dot"></span> Not connected — running in demo mode. Click ⚙ to connect your API.
+  </div>
+
+  <div class="connex-body" id="connexBody"></div>
+
+  <div class="connex-inputbar">
+    <input type="text" id="connexInput" placeholder="Type your message...">
+    <button class="send-btn" id="sendBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+  <div class="footnote">Connex is an AI assistant · Responses grounded in approved content</div>
+</div>
+
+<!-- ===== Settings / connect-your-API modal ===== -->
+<div class="settings-overlay hidden" id="settingsOverlay">
+  <div class="settings-modal">
+    <h3>Connect your AI API</h3>
+    <p class="hint">Point Connex at the AI API you've built. Settings are kept in memory for this browser session only — nothing is saved to disk or sent anywhere else.</p>
+
+    <div class="field">
+      <label>API format</label>
+      <select id="apiFormat">
+        <option value="anthropic">Anthropic-style (/v1/messages)</option>
+        <option value="openai">OpenAI-compatible (/v1/chat/completions)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Endpoint URL</label>
+      <input type="text" id="apiEndpoint" placeholder="https://your-api.example.com/v1/messages">
+    </div>
+
+    <div class="field">
+      <label>API key</label>
+      <input type="password" id="apiKey" placeholder="sk-... (sent as a header, never stored)">
+      <small>Sent as <code>x-api-key</code> for Anthropic-style, or <code>Authorization: Bearer</code> for OpenAI-compatible.</small>
+    </div>
+
+    <div class="field">
+      <label>Model</label>
+      <input type="text" id="apiModel" placeholder="e.g. claude-sonnet-4-6 or gpt-4o">
+    </div>
+
+    <div class="settings-actions">
+      <button class="btn-secondary" id="cancelSettings">Cancel</button>
+      <button class="btn-primary" id="saveSettings">Connect</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- state ----------
+const state = {
+  connected:true,
+  apiEndpoint:'https://connex-backend-y8m4.onrender.com/ask',
+  history:[]
+};
+
+const els = {
+  fab:document.getElementById('fabBtn'),
+  panel:document.getElementById('connexPanel'),
+  close:document.getElementById('closeBtn'),
+  body:document.getElementById('connexBody'),
+  input:document.getElementById('connexInput'),
+  send:document.getElementById('sendBtn'),
+  status:document.getElementById('connexStatus'),
+  settingsBtn:document.getElementById('settingsBtn'),
+  overlay:document.getElementById('settingsOverlay'),
+  cancelSettings:document.getElementById('cancelSettings'),
+  saveSettings:document.getElementById('saveSettings'),
+  apiFormat:document.getElementById('apiFormat'),
+  apiEndpoint:document.getElementById('apiEndpoint'),
+  apiKey:document.getElementById('apiKey'),
+  apiModel:document.getElementById('apiModel'),
+};
+
+const SYSTEM_PROMPT = `You are Connex, the AI assistant embedded in AstraZeneca's Access 360 provider portal.
+You help US healthcare providers and office staff with: medication prescribing information, enrollment forms and resources, patient affordability options, and enrolling/managing patients.
+Keep answers concise, clinical, and professional. When information isn't something you can verify, say so and point the provider to the relevant downloadable resource instead of guessing.`;
+
+let panelOpen = false;
+
+function togglePanel(open){
+  panelOpen = open;
+  els.panel.classList.toggle('hidden', !open);
+  if(open && els.body.children.length === 0){
+    greet();
+  }
+}
+els.fab.addEventListener('click', ()=>togglePanel(!panelOpen));
+els.close.addEventListener('click', ()=>togglePanel(false));
+
+// ---------- settings modal ----------
+els.settingsBtn.addEventListener('click', ()=>{
+  els.apiFormat.value = state.apiFormat;
+  els.apiEndpoint.value = state.apiEndpoint;
+  els.apiKey.value = state.apiKey;
+  els.apiModel.value = state.apiModel;
+  els.overlay.classList.remove('hidden');
+});
+els.cancelSettings.addEventListener('click', ()=>els.overlay.classList.add('hidden'));
+els.saveSettings.addEventListener('click', ()=>{
+  state.apiFormat = els.apiFormat.value;
+  state.apiEndpoint = els.apiEndpoint.value.trim();
+  state.apiKey = els.apiKey.value.trim();
+  state.apiModel = els.apiModel.value.trim();
+  state.connected = !!state.apiEndpoint;
+  els.status.classList.toggle('connected', state.connected);
+  els.status.innerHTML = state.connected
+    ? `<span class="dot"></span> Connected to your API (${state.apiModel || 'default model'})`
+    : `<span class="dot"></span> Not connected — running in demo mode. Click ⚙ to connect your API.`;
+  els.overlay.classList.add('hidden');
+});
+
+// ---------- message rendering ----------
+function addMsg(role, text){
+  const div = document.createElement('div');
+  div.className = 'msg ' + (role==='user'?'user':'bot');
+  div.textContent = text;
+  els.body.appendChild(div);
+  els.body.scrollTop = els.body.scrollHeight;
+  return div;
+}
+function addQuickReplies(options){
+  const wrap = document.createElement('div');
+  wrap.className = 'quick-replies';
+  options.forEach(opt=>{
+    const b = document.createElement('button');
+    b.className = 'qr-btn';
+    b.textContent = opt;
+    b.onclick = ()=>handleUserText(opt);
+    wrap.appendChild(b);
+  });
+  els.body.appendChild(wrap);
+  els.body.scrollTop = els.body.scrollHeight;
+}
+function addDownload(label){
+  const b = document.createElement('button');
+  b.className = 'dl-btn';
+  b.innerHTML = '⬇ ' + label;
+  els.body.appendChild(b);
+  els.body.scrollTop = els.body.scrollHeight;
+}
+
+function greet(){
+  addMsg('bot', "Hello! Welcome to your AstraZeneca provider support experience. I'm here to help you quickly find approved medication information, forms, affordability resources, enrollment guidance, or patient support status.\n\nHow may I assist you today?");
+  addQuickReplies(['Medications','Patient enrollment','Forms & Resources','Affordability support']);
+}
+
+// ---------- demo-mode conversation tree (mirrors the mockup flow) ----------
+function demoResponse(text){
+  const t = text.toLowerCase();
+  if(t.includes('medication')){
+    addMsg('bot','Select Medication:');
+    addQuickReplies(['Baxfendy','Fasenra','Calquence','Faslodex']);
+    return;
+  }
+  if(t === 'calquence'){
+    addMsg('bot','Are you looking for:');
+    addQuickReplies(['Prescribing Information','Enrollment Forms & Resources','Affordability Options','Enroll & Manage Patients']);
+    return;
+  }
+  if(t.includes('prescribing')){
+    addMsg('bot','CALQUENCE (acalabrutinib): 100 mg orally every 12 hours; swallow whole, with or without food.\n• Do not chew, crush, dissolve, or cut tablets\n• Manage toxicities via interruption, dose reduction, or discontinuation; avoid in severe hepatic impairment');
+    addDownload('CALQUENCE Tablets Full Prescribing Information');
+    return;
+  }
+  if(t.includes('enrollment form')){
+    addMsg('bot','Here is the enrollment form for CALQUENCE:');
+    addDownload('CALQUENCE Enrollment Form');
+    return;
+  }
+  if(t.includes('affordability')){
+    addMsg('bot','Here is the affordability brochure for CALQUENCE:');
+    addDownload('CALQUENCE Affordability Brochure');
+    return;
+  }
+  if(t.includes('enroll & manage') || t.includes('patient enrollment') || t.includes('enroll a patient')){
+    addMsg('bot','Please provide the patient, provider, and prescription information to start a new request for support. (In the full build, this opens an enrollment form for First Name, Last Name, DOB, contact info, insurance, and diagnosis.)');
+    return;
+  }
+  if(t.includes('forms') || t.includes('resources')){
+    addMsg('bot','All CALQUENCE resources:');
+    ['Enrollment Form','Coding Resource','Distribution Sheet','Affordability Brochure','Access and Reimbursement Guide'].forEach(addDownload);
+    return;
+  }
+  addMsg('bot', "I can help with medication information, forms, affordability, enrollment guidance, or patient support status. This is demo mode — connect your AI API (⚙ icon) for live, open-ended answers.");
+}
+
+// ---------- send handling ----------
+async function handleUserText(text){
+  if(!text.trim()) return;
+  addMsg('user', text);
+  state.history.push({role:'user', content:text});
+
+  if(state.connected){
+    const typing = addMsg('bot','Connex is typing…');
+    typing.classList.add('typing');
+    try{
+      const reply = await callCustomAPI(text);
+      typing.remove();
+      addMsg('bot', reply);
+      state.history.push({role:'assistant', content:reply});
+    }catch(err){
+      typing.remove();
+      addMsg('bot', 'Sorry — I could not reach your API (' + err.message + '). Check the endpoint and key in settings.');
+    }
+  }else{
+    demoResponse(text);
+  }
+}
+
+els.send.addEventListener('click', ()=>{
+  const v = els.input.value;
+  els.input.value = '';
+  handleUserText(v);
+});
+els.input.addEventListener('keydown', e=>{
+  if(e.key === 'Enter'){
+    const v = els.input.value;
+    els.input.value = '';
+    handleUserText(v);
+  }
+});
+
+// ---------- calling the user's own API ----------
+async function callCustomAPI(userText){
+  const res = await fetch('https://connex-backend-y8m4.onrender.com/ask', {
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json'
+    },
+    body: JSON.stringify({
+      question: userText
+    })
+  });
+
+  if(!res.ok){
+    throw new Error('HTTP ' + res.status);
+  }
+
+  const data = await res.json();
+
+  return data.answer || 'No answer was returned.';
+}
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const block = (data.content || []).find(b=>b.type==='text');
+    return block ? block.text : '(no text response)';
+  } else {
+    const res = await fetch(state.apiEndpoint, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        ...(state.apiKey ? {'Authorization':'Bearer ' + state.apiKey} : {})
+      },
+      body: JSON.stringify({
+        model: state.apiModel || 'gpt-4o',
+        messages: [{role:'system', content:SYSTEM_PROMPT}, ...state.history]
+      })
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || '(no text response)';
+  }
+}
+
+// medication cards open the chat with that med preselected
+document.querySelectorAll('.med-card').forEach(card=>{
+  card.addEventListener('click', ()=>{
+    const name = card.querySelector('.med-name').textContent.trim();
+    togglePanel(true);
+    setTimeout(()=>handleUserText(name), 150);
+  });
+});
+</script>
+</body>
+</html>
