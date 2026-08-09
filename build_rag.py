@@ -31,7 +31,11 @@ def split_text(text, chunk_size=1000, overlap=200):
 
 
 # Find all extracted text files
-text_files = list(TEXT_FOLDER.glob("*.txt"))
+text_files = [
+    file_path
+    for file_path in TEXT_FOLDER.glob("*.txt")
+    if file_path.name != "requirements.txt"
+]
 
 print(f"Found {len(text_files)} text files.")
 
