@@ -7,7 +7,7 @@ app = FastAPI()
 
 # Connect to ChromaDB
 client = chromadb.PersistentClient(path="chroma_db")
-collection = client.get_collection(name="pdf_documents")
+collection = client.get_or_create_collection(name="pdf_documents")
 
 
 class Question(BaseModel):
