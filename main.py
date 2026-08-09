@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import chromadb
 import requests
+import os
 
 app = FastAPI()
 
@@ -25,7 +26,6 @@ def ask_question(data: Question):
 
     print("STEP 1: Starting ChromaDB search")
 
-    # Search ChromaDB
     results = collection.query(
         query_texts=[question],
         n_results=5
@@ -33,15 +33,11 @@ def ask_question(data: Question):
 
     print("STEP 2: ChromaDB search finished")
 
-    # Get documents
     documents = results["documents"][0]
-
-    # Build context
     context = "\n\n".join(documents)
 
-    print("STEP 3: Sending request to Ollama")
+    print("STEP 3: Sending request to Gemini")
 
-    # Prompt for Ollama
     prompt = f"""
 You are Connex, a helpful healthcare assistant that answers questions
 using the provided documents.
@@ -60,22 +56,38 @@ Question:
 Answer:
 """
 
-    # Send request to Ollama
+    api_key = os.getenv("GEMINI_API_KEY")
+
+    if not api_key:
+        return {"error": "GEMINI_API_KEY is not configured"}
+
     response = requests.post(
-        "http://127.0.0.1:11434/api/generate",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        headers={
+            "Content-Type": "application/json",
+            "x-goog-api-key": api_key
+        },
         json={
-            "model": "llama3.1:8b",
-            "prompt": prompt,
-            "stream": False
+            "contents": [
+                {
+                    "parts": [
+                        {
+                            "text": prompt
+                        }
+                    ]
+                }
+            ]
         },
         timeout=120
     )
 
-    print("STEP 4: Ollama response received")
+    print("STEP 4: Gemini response received")
 
     response.raise_for_status()
 
-    answer = response.json()["response"]
+    gemini_data = response.json()
+
+    answer = gemini_data["candidates"][0]["content"]["parts"][0]["text"]
 
     print("STEP 5: Answer generated")
 
