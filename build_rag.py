@@ -3,7 +3,7 @@ from sentence_transformers import SentenceTransformer
 import chromadb
 
 # Where our extracted text files are
-TEXT_FOLDER = Path("extracted_text")
+TEXT_FOLDER = Path(".")
 
 # Where ChromaDB will save its database
 DB_FOLDER = "chroma_db"
