@@ -527,45 +527,24 @@ els.input.addEventListener('keydown', e=>{
 });
 
 // ---------- calling the user's own API ----------
-async function callCustomAPI(userText){
+async function callCustomAPI(userText) {
   const res = await fetch('https://connex-backend-y8m4.onrender.com/ask', {
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json'
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       question: userText
     })
   });
 
-  if(!res.ok){
+  if (!res.ok) {
     throw new Error('HTTP ' + res.status);
   }
 
   const data = await res.json();
 
   return data.answer || 'No answer was returned.';
-}
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    const block = (data.content || []).find(b=>b.type==='text');
-    return block ? block.text : '(no text response)';
-  } else {
-    const res = await fetch(state.apiEndpoint, {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        ...(state.apiKey ? {'Authorization':'Bearer ' + state.apiKey} : {})
-      },
-      body: JSON.stringify({
-        model: state.apiModel || 'gpt-4o',
-        messages: [{role:'system', content:SYSTEM_PROMPT}, ...state.history]
-      })
-    });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content || '(no text response)';
-  }
 }
 
 // medication cards open the chat with that med preselected
